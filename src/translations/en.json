@@ -1,0 +1,12 @@
+{
+  "error": {
+    "invalid_config": "Invalid configuration",
+    "missing_entity": "Incorrect entity"
+  },
+  "common": {
+    "yesterday": "Yesterday",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "approved_since": "Approved since"
+  }
+}

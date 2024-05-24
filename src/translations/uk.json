@@ -1,0 +1,12 @@
+{
+    "error": {
+      "invalid_config": "Неправильна конфігурація",
+      "missing_entity": "Необхідно вказати сутність"
+    },
+    "common": {
+      "yesterday": "Вчора",
+      "today": "Сьогодні",
+      "tomorrow": "Завтра",
+      "approved_since": "Затверджено"
+    }
+  }

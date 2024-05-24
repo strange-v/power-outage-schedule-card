@@ -1,0 +1,40 @@
+:host {
+  --vc-background: var(--ha-card-background, var(--card-background-color, white));
+  --vc-spacing: 10px;
+  --primary-color: #89B3F8;
+  --light-theme-background: #fff;
+  --dark-theme-background: #1d1d1d;
+}
+
+ha-card {
+  background-color: var(--vc-background);
+
+  .header {
+    padding: var(--vc-spacing);
+    text-align: center;
+  }
+
+  .schedule {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    &.empty {
+      min-height: 100px;
+      padding: 0px 15%;
+      font-size: 1.25em;
+      text-align: center;
+      line-height: 1.5em;
+    }
+
+  }
+
+  .approved {
+    box-sizing: border-box;
+    padding: var(--vc-spacing);
+    opacity: .5;
+    text-align: right;
+    width: 100%;
+  }
+}
