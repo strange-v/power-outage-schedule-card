@@ -1,5 +1,5 @@
 {
     "name": "Power outage schedule card",
     "render_readme": true,
-    "filename": "dist/roborock-vacuum-card.js"
+    "filename": "dist/power-outage-schedule-card.js"
 }
