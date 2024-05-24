@@ -1,5 +1,4 @@
 {
     "name": "Power outage schedule card",
-    "render_readme": true,
-    "filename": "power-outage-schedule-card.js"
+    "render_readme": true
 }
