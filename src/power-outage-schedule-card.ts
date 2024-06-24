@@ -167,7 +167,11 @@ export class PowerOutageScheduleCard extends LitElement {
   private callService(action: PowerOutageCardAction) {
     const { service, service_data, target } = action;
     const [domain, name] = service.split('.');
-    this.hass.callService(domain, name, service_data, target);
+    
+    this.hass.callService(domain, name, {
+      ...service_data,
+      entity_id: target,
+    });
   }
 
   private state(id: string): string {
