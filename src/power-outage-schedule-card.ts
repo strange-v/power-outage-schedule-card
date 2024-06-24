@@ -10,9 +10,10 @@ import {
   PowerOutageScheduleCardConfig,
   PowerOutageSchedule,
   ScheduleGraphColors,
+  PowerOutageCardAction,
 } from './types'
 import {
-  getScheduleGraph
+  getScheduleGraph,
 } from './resources'
 
 register();
@@ -60,18 +61,20 @@ export class PowerOutageScheduleCard extends LitElement {
     `;
   }
 
-  private getSchedule(queue: string, id: string, colors: ScheduleGraphColors) : Template {
+  private getSchedule(queue: string, id: string, colors: ScheduleGraphColors): Template {
     const data = this.getQueueData(id);
     const day = this.getRelativeDate(data.eventDate);
     const dayLocal = localize(`common.${day}`);
     const hidePast = this.config.hide_past_hours && day == 'Today';
     const graph = getScheduleGraph(queue, dayLocal!, data.hours, hidePast, colors);
+    const reload = this.getReloadIcon();
 
     if (!data.scheduleApprovedSince) {
       return html`
       <swiper-slide>
       <div class="schedule empty">
         ${this.config.empty_text}
+        ${reload}
       </div>
       </swiper-slide>
       `;
@@ -83,7 +86,10 @@ export class PowerOutageScheduleCard extends LitElement {
       <swiper-slide>
       <div class="schedule">
         ${graph}
-        <div class="approved">${approvedSince}: ${data.scheduleApprovedSince}</div>
+        <div class="footer">
+          <div class="actions">${reload}</div>
+          <div class="approved">${approvedSince}: ${data.scheduleApprovedSince}</div>
+        </div>
       </div>
       </swiper-slide>
     `;
@@ -115,6 +121,17 @@ export class PowerOutageScheduleCard extends LitElement {
     return data;
   }
 
+  private getReloadIcon(): Template {
+    if (!this.config.reload_action)
+      return nothing;
+    return html`<div class="action-reload" @click=${this.onReload}><ha-icon icon="mdi:refresh"></ha-icon></div>`;
+  }
+
+  private onReload() {
+    if (this.config.reload_action)
+      this.callService(this.config.reload_action);
+  }
+
   getGraphColors(): ScheduleGraphColors {
     const darkMode = this.hass.themes.darkMode;
     return {
@@ -137,15 +154,21 @@ export class PowerOutageScheduleCard extends LitElement {
     const differenceInDays = differenceInTime / (1000 * 3600 * 24);
 
     if (differenceInDays === 0) {
-        return "Today";
+      return "Today";
     } else if (differenceInDays === 1) {
-        return "Tomorrow";
+      return "Tomorrow";
     } else if (differenceInDays === -1) {
-        return "Yesterday";
+      return "Yesterday";
     } else {
-        return date;
+      return date;
     }
-}
+  }
+
+  private callService(action: PowerOutageCardAction) {
+    const { service, service_data, target } = action;
+    const [domain, name] = service.split('.');
+    this.hass.callService(domain, name, service_data, target);
+  }
 
   private state(id: string): string {
     return this.hass.states[id].state;

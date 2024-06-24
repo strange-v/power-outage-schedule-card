@@ -6,7 +6,7 @@ import {
 
 export function getScheduleGraph(queue: string, day: string, hours: Record<number, number>, today: boolean, colors: ScheduleGraphColors): Template {
   const cls: Record<number, string> = {};
-  
+
   const now = new Date;
   for (let i = 0; i <= 24; i++) {
     cls[i] = '';

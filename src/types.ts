@@ -1,5 +1,8 @@
-import { TemplateResult, nothing } from 'lit';
+import {
+  HassServiceTarget,
+} from 'home-assistant-js-websocket';
 import { HomeAssistant } from 'custom-card-helpers';
+import { TemplateResult, nothing } from 'lit';
 
 export type TemplateNothing = typeof nothing;
 export type Template = TemplateResult | TemplateNothing;
@@ -26,6 +29,12 @@ export interface MyHomeAssistant extends HomeAssistant {
   themes: Themes
 }
 
+export interface PowerOutageCardAction {
+  service: string;
+  service_data?: Record<string, unknown>;
+  target?: HassServiceTarget;
+}
+
 export interface PowerOutageScheduleCardConfig {
   title: string;
   empty_text: string;
@@ -33,6 +42,7 @@ export interface PowerOutageScheduleCardConfig {
   queue_entity: string;
   today_entity: string;
   tomorrow_entity: string;
+  reload_action?: PowerOutageCardAction;
 }
 
 export interface PowerOutageSchedule {

@@ -20,6 +20,7 @@ export default function buildConfig(
     tomorrow_entity: config.tomorrow_entity,
     title: config.title ?? '',
     empty_text: config.empty_text ?? 'No data yet',
-    hide_past_hours: config.hide_past_hours ?? true
+    hide_past_hours: config.hide_past_hours ?? true,
+    reload_action: config.reload_action,
   };
 }

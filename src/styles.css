@@ -30,11 +30,26 @@ ha-card {
 
   }
 
-  .approved {
+  .footer {
+    display: flex;
     box-sizing: border-box;
     padding: var(--vc-spacing);
+    width: 100%;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .approved {
     opacity: .5;
     text-align: right;
-    width: 100%;
+    flex: 1
+  }
+
+  .action-reload {
+    cursor: pointer;
   }
 }
