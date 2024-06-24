@@ -14,6 +14,9 @@ tomorrow_entity: sensor.tomorrow
 hide_past_hours: true
 title: Power outage schedule
 empty_text: The schedule for hourly outages will be published by the end of the day.
+reload_action:
+  service: homeassistant.update_entity
+  target: sensor.queue
 ```
 
 ## Data retrieval example
@@ -49,7 +52,7 @@ rest:
       unique_id: f8f18ae743474e31b9663aea35899241
       value_template: >-
         {% set data = value_json['current'] %}
-        {% if data.hasQueue == "yes" %}
+        {% if data.hasQueue == "yes" and 'today' in value_json['graphs'] %}
           {% set graph = value_json['graphs']['today'] %}
           {% if graph %}
             {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList %}{{ (hour.hour | int) - 1 }}:{{ hour.electricity }};{% endfor %}
@@ -63,7 +66,7 @@ rest:
       unique_id: 30ae7b0bc3fd4da8ad2c2ab5678c522e
       value_template: >-
         {% set data = value_json['current'] %}
-        {% if data.hasQueue == "yes" %}
+        {% if data.hasQueue == "yes" and 'tomorrow' in value_json['graphs'] %}
           {% set graph = value_json['graphs']['tomorrow'] %}
           {% if graph %}
             {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList %}{{ (hour.hour | int) - 1 }}:{{ hour.electricity }};{% endfor %}
