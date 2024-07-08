@@ -38,6 +38,7 @@ rest:
       "accountNumber": "XXXXXXXX"
       "userSearchChoice": "pob"
       "address": ""
+    method: POST
     sensor:
     - name: "OE Queue"
       unique_id: 3ac7ab5e3ce64c558f86dd6c9c600677
