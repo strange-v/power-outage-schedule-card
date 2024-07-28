@@ -2,25 +2,96 @@
 
 Power outage schedule card for Home Assistant. The card is designed to work with the information provided by svitlo.oe.if.ua (see data retrieval example). It shows the schedule for today and tomorrow (if provided).
 
-![Power outage schedule card example](/images/POS.gif)
+![Power outage schedule card example](images/POS.gif)
+
+## Installation Guide
+
+1. **Install "File editor" addon in HA**
+   
+    Go to Settings -> Add-ons -> ADD-ON STORE <br>
+    Find "File editor" and intsall add-on <br>
+    Start the add-on and toggle "Show in sidebar"
+    <details>
+    <summary>Screenshot</summary>
+    <IMG src="images/file_editor_addon.jpeg"  alt="file editor add-on"/>
+    </details>
+
+2. **Install the module**
+   
+    Go to "File editor" on the sidebar and choose "Browse Filesystem" in the top left corner. <br>
+    Create a *www* directory if you don't have one and a *power-outage-schedule-card.js* file inside it. <br>
+    Copy the code from this repository's [dist/power-outage-schedule-card.js](dist/power-outage-schedule-card.js) to the newly created file. Save the changes.
+    <details>
+    <summary>Screenshot</summary>
+    <IMG src="images/install_module.jpeg"  alt="module installation"/>
+    </details>
+
+3. **Configure the sensors**
+   
+    Go to "File editor" and open the configuration.yaml file and append the code from [Data retrieval example](#data-retrieval-example) <br>
+    Don't forget to fill your address or personal account number in the params.
+    <details>
+    <summary>Screenshot</summary>
+    <IMG src="images/sensors_configuration.jpeg"  alt="sensors configuration"/>
+    </details>
+
+4. **Turn on the advanced mode**
+   
+    Go to a "User settings" and toggle "Advanced mode"
+    <details>
+    <summary>Screenshot</summary>
+    <IMG src="images/advanced_mode.jpeg"  alt="advanced mode"/>
+    </details>
+   
+5. **Add a new resource**
+
+    Go to a Settings -> Dashboards, press the ⋮ menu in the top right corner and choose "Resources". <br>
+    Press the "Add resource" button and add a Javascript module resource with a URL */local/power-outage-schedule-card.js*
+    <details>
+    <summary>Screenshot</summary>
+    <IMG src="images/add_resource.jpeg"  alt="add resource"/>
+    </details>
+   
+6. **Reload configuration**
+   
+    Go to "Developer tools", choose "Restart" and "Quick reload"
+    <details>
+    <summary>Screenshot</summary>
+    <IMG src="images/restart_configuration.jpeg"  alt="reload configuration"/>
+    </details>
+   
+7. **Configure the card** 
+   
+    Open a desired dashboard, press on "Add card" and choose "Manual".
+    Copy and paste the code from [Card configuration example](#card-configuration-example) <br>
+    <details>
+    <summary>Screenshot</summary>
+    <IMG src="images/add_card.jpeg"  alt="add card"/>
+    <IMG src="images/configure_card.jpeg"  alt="configure card"/>
+    </details>
 
 ## Card configuration example
 
 ```yaml
 type: custom:power-outage-schedule-card
-queue_entity: sensor.queue
-today_entity: sensor.today
-tomorrow_entity: sensor.tomorrow
+queue_entity: sensor.oe_queue
+today_entity: sensor.oe_today
+tomorrow_entity: sensor.oe_tomorrow
 hide_past_hours: true
 title: Power outage schedule
 empty_text: The schedule for hourly outages will be published by the end of the day.
 reload_action:
   service: homeassistant.update_entity
-  target: sensor.queue
+  target: sensor.oe_queue
 ```
 
 ## Data retrieval example
-
+> [!TIP]
+> You can use your address or personal account number to fetch the actual data about power outages:
+> 
+> Put your oblenergo personal account number in __*accountNumber*__ param <br>
+> OR <br>
+> Put your address in format "Івано-Франківськ,Індустріальна,32" in __*address*__ param
 ```yaml
 rest:
   - resource: "https://svitlo.oe.if.ua/GAVTurnOff/GavGroupByAccountNumber"
@@ -35,7 +106,7 @@ rest:
       "Connection": "keep-alive"
       "Referer": "https://svitlo.oe.if.ua/"
     params:
-      "accountNumber": "XXXXXXXX"
+      "accountNumber": ""
       "userSearchChoice": "pob"
       "address": ""
     method: POST
