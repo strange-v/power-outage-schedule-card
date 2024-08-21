@@ -77,7 +77,7 @@ rest:
         {% if data.hasQueue == "yes" and 'today' in value_json['graphs'] %}
           {% set graph = value_json['graphs']['today'] %}
           {% if graph %}
-            {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList %}{{ (hour.hour | int) - 1 }}:{{ hour.electricity }};{% endfor %}
+            {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList %}{{ (hour.periodLimitValue | int) - 1 }}:{{ hour.electricity }};{% endfor %}
           {% else %}
             none
           {% endif %}
@@ -91,7 +91,7 @@ rest:
         {% if data.hasQueue == "yes" and 'tomorrow' in value_json['graphs'] %}
           {% set graph = value_json['graphs']['tomorrow'] %}
           {% if graph %}
-            {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList %}{{ (hour.hour | int) - 1 }}:{{ hour.electricity }};{% endfor %}
+            {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList %}{{ (hour.periodLimitValue | int) - 1 }}:{{ hour.electricity }};{% endfor %}
           {% else %}
             none
           {% endif %}
