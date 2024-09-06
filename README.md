@@ -5,8 +5,11 @@ Power outage schedule card for Home Assistant. The card is designed to work with
 ![Power outage schedule card example](/images/POS.gif)
 
 ## Installation
+
 ### HACS
+
 This card can be installed using [HACS](https://hacs.xyz/) (Home Assistant Community Store) custom repositories.
+
 1. Install HACS.
 1. Go to HACS -> Frontend -> Custom repositories (in the menu).
 1. Set the repository to `https://github.com/strange-v/power-outage-schedule-card` and the category to `Lovelace`.
@@ -15,6 +18,7 @@ This card can be installed using [HACS](https://hacs.xyz/) (Home Assistant Commu
 1. Accept reload.
 
 ### Manual
+
 1. Download `power-outage-schedule-card.js` file from the [latest-release](https://github.com/strange-v/power-outage-schedule-card/releases/latest) or `dist` folder.
 1. Put `power-outage-schedule-card.js` file into your `config/www` folder (this can be done through the "File editor" addon if HA OS is used).
 1. Add a reference to `power-outage-schedule-card.js` in Lovelace resources.
@@ -25,7 +29,9 @@ This card can be installed using [HACS](https://hacs.xyz/) (Home Assistant Commu
    5. Set the URL to `/local/power-outage-schedule-card.js` and the Resource type to `JavaScript module`
 
 ## Card configuration
+
 The card can be configured only using YAML (the UI editor is unsupported).
+
 ```yaml
 type: custom:power-outage-schedule-card
 queue_entity: sensor.queue
@@ -40,8 +46,10 @@ reload_action:
 ```
 
 ## Data retrieval
+
 You can use your address or personal account number to fetch the actual data about power outages.
 Put your oblenergo personal account number into the `accountNumber` parameter or your address (e.g., `Івано-Франківськ,Індустріальна,32`) into the `address` parameter.
+
 ```yaml
 rest:
   - resource: "https://svitlo.oe.if.ua/GAVTurnOff/GavGroupByAccountNumber"
@@ -99,3 +107,9 @@ rest:
           none
         {% endif %}
 ```
+
+## Notifications
+
+![Notification: power outage schedule added](/images/notification_schedule_added.png) ![Notification: power outage schedule changed](/images/notification_schedule_changed.png)
+
+[Read more](/notifications/) about how to configure notifications.

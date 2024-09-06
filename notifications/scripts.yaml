@@ -1,0 +1,131 @@
+script:
+  notify_power_outage_schedule_changed:
+    alias: Notify power outage schedule changed
+    sequence:
+    - if:
+      - condition: template
+        value_template: >-
+          {% set is_valid = current != 'none' and current != 'unavailable' and previous != 'none' and previous != 'unavailable' %}
+          {% set current_date = current.split(';')[0] %}
+          {% set previous_date = previous.split(';')[0] %}
+          {% set current_data = ';'.join(current.split(';')[2:]) %}
+          {% set previous_data = ';'.join(previous.split(';')[2:]) %}
+          {{ is_valid and current_date == previous_date and current_data != previous_data }}
+      then:
+        - service: notify.notifyfamily
+          data:
+            title: Power outage schedule changed
+            data:
+              clickAction: /ui-lovelace-minimalist/power
+            message: >-
+              {% set current_data = current.split(';')[2:] %}
+              {% set previous_data = previous.split(';')[2:] %}
+              {% set ns = namespace(current_green=0, current_red=0, current_yellow=0, previous_green=0, previous_red=0, previous_yellow=0) %}
+              {% for item in current_data %}
+                {% if item.find(':') != -1 %}
+                  {% set hour, state = item.split(':') %}
+                  {% if state == '0' %}
+                    {% set ns.current_green = ns.current_green + 1 %}
+                  {% elif state == '1' %}
+                    {% set ns.current_red = ns.current_red + 1 %}
+                  {% elif state == '2' %}
+                  {% set ns.current_yellow = ns.current_yellow + 1 %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+              {% for item in previous_data %}
+                {% if item.find(':') != -1 %}
+                  {% set hour, state = item.split(':') %}
+                  {% if state == '0' %}
+                    {% set ns.previous_green = ns.previous_green + 1 %}
+                  {% elif state == '1' %}
+                    {% set ns.previous_red = ns.previous_red + 1 %}
+                  {% elif state == '2' %}
+                    {% set ns.previous_yellow = ns.previous_yellow + 1 %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+              {% if ns.current_green != ns.previous_green %}
+                {% set diff = ns.current_green - ns.previous_green %}
+                {% if diff > 0 %} Plus {% else %} Minus {% endif %} {{ diff | abs }} {% if diff | abs == 1 %} hour {% else %} hours {% endif %} of electricity for {{ day }}.
+              {%- endif %}
+              {%- if ns.current_red != ns.previous_red %}
+                {%- set diff = ns.current_red - ns.previous_red %}
+                {% if diff > 0 %} + {% else %} - {% endif %}{{ diff | abs }} {% if diff | abs == 1 %} hour {% else %} hours {% endif %} in red zone.
+              {%- endif %}
+              {%- if ns.current_yellow != ns.previous_yellow %}
+                {%- set diff = ns.current_yellow - ns.previous_yellow %}
+                {% if diff > 0 %} + {% else %} - {% endif %}{{ diff | abs }} {% if diff | abs == 1 %} hour {% else %} hours {% endif %} in yellow zone.
+              {% endif %}
+    fields:
+      previous:
+        selector:
+          text:
+        name: previous
+        required: true
+      current:
+        selector:
+          text:
+        name: current
+        required: true
+      day:
+        selector:
+          text:
+        name: day
+        required: true
+    description: ''
+
+  notify_power_outage_schedule_added:
+    alias: Notify power outage schedule added
+    sequence:
+      - if:
+          - condition: template
+            value_template: >-
+              {% set is_valid = current != 'none' and current != 'unavailable' and previous == 'none' %}
+              {% set is_different = current != previous %}
+              {{ is_valid and is_different }}
+        then:
+          - service: notify.notifyfamily
+            data:
+              title: Power outage schedule changed
+              data:
+                clickAction: /ui-lovelace-minimalist/power
+              message: >-
+                {% set current_data = current.split(';')[2:] %}
+                {% set ns = namespace(current_green=0, current_red=0, current_yellow=0) %}
+
+                {% for item in current_data %}
+                  {% if item.find(':') != -1 %}
+                    {% set hour, state = item.split(':') %}
+                    {% if state == '0' %}
+                      {% set ns.current_green = ns.current_green + 1 %}
+                    {% elif state == '1' %}
+                      {% set ns.current_red = ns.current_red + 1 %}
+                    {% elif state == '2' %}
+                      {% set ns.current_yellow = ns.current_yellow + 1 %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+
+                You will have {{ ns.current_green }} {% if ns.current_green == 1 %} hour {% else %} hours {% endif %} of electricity.
+
+                {% if ns.current_red > 0 %} {{ ns.current_red }} {% if ns.current_red == 1 %} hour {% else %} hours {% endif %} in red zone. {% endif %}
+
+                {% if ns.current_yellow > 0 %} {{ ns.current_yellow }} {% if ns.current_yellow == 1 %} hour {% else %} hours {% endif %} in yellow zone. {% endif %}
+    fields:
+      previous:
+        selector:
+          text: null
+        name: previous
+        required: true
+      current:
+        selector:
+          text: null
+        name: current
+        required: true
+      day:
+        selector:
+          text: null
+        name: day
+        required: true
+    description: ""
