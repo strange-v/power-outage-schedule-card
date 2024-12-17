@@ -52,7 +52,7 @@ Put your oblenergo personal account number into the `accountNumber` parameter or
 
 ```yaml
 rest:
-  - resource: "https://svitlo.oe.if.ua/GAVTurnOff/GavGroupByAccountNumber"
+  - resource: "https://be-svitlo.oe.if.ua/GavGroupByAccountNumber"
     scan_interval: 3600
     headers:
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0"
@@ -76,7 +76,7 @@ rest:
         {% if data.hasQueue == "yes" %}
           {{ data.queue }}.{{ data.subqueue }}
         {% else %}
-        No queue
+          No queue
         {% endif %}
     - name: "OE Today"
       unique_id: f8f18ae743474e31b9663aea35899241
@@ -85,7 +85,7 @@ rest:
         {% if data.hasQueue == "yes" and 'today' in value_json['graphs'] %}
           {% set graph = value_json['graphs']['today'] %}
           {% if graph %}
-            {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList %}{{ (hour.periodLimitValue | int) - 1 }}:{{ hour.electricity }};{% endfor %}
+            {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList|sort(attribute='periodLimitValue') %}{{ hour.electricity }};{% endfor %}
           {% else %}
             none
           {% endif %}
@@ -99,7 +99,7 @@ rest:
         {% if data.hasQueue == "yes" and 'tomorrow' in value_json['graphs'] %}
           {% set graph = value_json['graphs']['tomorrow'] %}
           {% if graph %}
-            {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList %}{{ (hour.periodLimitValue | int) - 1 }}:{{ hour.electricity }};{% endfor %}
+            {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList|sort(attribute='periodLimitValue') %}{{ hour.electricity }};{% endfor %}
           {% else %}
             none
           {% endif %}

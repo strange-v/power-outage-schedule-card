@@ -48,13 +48,16 @@ export interface PowerOutageScheduleCardConfig {
 export interface PowerOutageSchedule {
   eventDate: string;
   scheduleApprovedSince: string;
-  hours: Record<number, number>;
+  periods: Record<number, number>;
 }
 
 export interface ScheduleGraphColors {
   background: string;
   text: string;
   green: string;
+  green_past: string;
   red: string;
+  red_past: string;
   yellow: string;
+  yellow_past: string;
 }

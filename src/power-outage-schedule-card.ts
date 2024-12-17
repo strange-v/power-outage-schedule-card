@@ -66,7 +66,7 @@ export class PowerOutageScheduleCard extends LitElement {
     const day = this.getRelativeDate(data.eventDate);
     const dayLocal = localize(`common.${day}`);
     const hidePast = this.config.hide_past_hours && day == 'Today';
-    const graph = getScheduleGraph(queue, dayLocal!, data.hours, hidePast, colors);
+    const graph = getScheduleGraph(queue, dayLocal!, data.periods, hidePast, colors);
     const reload = this.getReloadIcon();
 
     if (!data.scheduleApprovedSince) {
@@ -99,7 +99,7 @@ export class PowerOutageScheduleCard extends LitElement {
     const data: PowerOutageSchedule = {
       eventDate: '',
       scheduleApprovedSince: '',
-      hours: {}
+      periods: {}
     };
     const state = this.state(id);
     const values = state.split(';');
@@ -110,13 +110,11 @@ export class PowerOutageScheduleCard extends LitElement {
     data.eventDate = values.shift()!;
     data.scheduleApprovedSince = values.shift()!;
 
-    values.forEach(v => {
+    values.forEach((v, i) => {
       if (!v)
         return;
 
-      const [hour, value] = v.split(':');
-
-      data.hours[Number(hour)] = Number(value);
+      data.periods[i] = Number(v);
     })
     return data;
   }
@@ -138,8 +136,11 @@ export class PowerOutageScheduleCard extends LitElement {
       background: darkMode ? '#1d1d1d' : '#fff',
       text: darkMode ? '#eee' : '#000',
       green: '#34D058',
+      green_past: darkMode ? '#214129' : '#d2f2da',
       red: '#F04F5A',
+      red_past: darkMode ? '#472729' : '#f8d8da',
       yellow: '#FFCA2C',
+      yellow_past: darkMode ? '#4a3f20' : '#fbf0d1',
     };
   }
 

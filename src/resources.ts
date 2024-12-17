@@ -4,45 +4,68 @@ import {
   ScheduleGraphColors,
 } from './types'
 
-export function getScheduleGraph(queue: string, day: string, hours: Record<number, number>, today: boolean, colors: ScheduleGraphColors): Template {
+export function getScheduleGraph(queue: string, day: string, periods: Record<number, number>, today: boolean, colors: ScheduleGraphColors): Template {
   const cls: Record<number, string> = {};
-
   const now = new Date;
-  for (let i = 0; i <= 24; i++) {
-    cls[i] = '';
+  let hour = 0;
+  let idx = 0;
+  while (hour <= 24) {
+    cls[idx] = '';
 
-    if (today && now.getHours() > i) {
-      cls[i] += 'past';
+    if (today && (now.getHours() > hour || (now.getHours() == hour && now.getMinutes() > 30 && !(idx % 2)))) {
+      cls[idx] += 'past';
+    } else {
+      debugger
     }
 
-    const value = hours[i];
+    const value = periods[idx];
     if (value > 0 && value <= 2)
-      cls[i] += value == 1 ? ' red' : ' yellow';
+      cls[idx] += value == 1 ? ' red' : ' yellow';
+
+    hour += 0.5;
+    idx += 1;
   }
 
-  return html`<svg xmlns="http://www.w3.org/2000/svg" width="90%" height="90%" version="1.1" viewBox="0 0 121.70833 121.70833">
+  return html`<svg xmlns="http://www.w3.org/2000/svg" width="90%" height="90%" version="1.1"  viewBox="0 0 100 100">
     <style>
+    .segment-container {
+      fill:none;
+      fill-opacity:0;
+      stroke:${colors.background};
+      stroke-width:1.4;
+      stroke-opacity:1;
+    }
     .segment {
       fill:${colors.green};
       fill-opacity:1;
-      stroke:${colors.background};
-      stroke-width:.5;
+      stroke:${colors.green};
+      stroke-width:.2;
+      stroke-opacity:1;
+    }
+      
+    .segment.past {
+      fill:${colors.green_past};
+      stroke:${colors.green_past};
     }
     .segment.red {
       fill:${colors.red};
+      stroke:${colors.red};
+    }
+    .segment.red.past {
+      fill:${colors.red_past};
+      stroke:${colors.red_past};
     }
     .segment.yellow {
       fill:${colors.yellow};
+      stroke:${colors.yellow};
     }
-    .segment.past {
-      fill-opacity:0.2;
+    .segment.yellow.past {
+      fill:${colors.yellow_past};
+      stroke:${colors.yellow_past};
     }
     .hour {
-      font-style:normal;
-      font-variant:normal;
       font-weight:600;
-      font-stretch:normal;
-      font-size:4.7625px;
+      font-size:5px;
       font-family:"Segoe UI";
       text-align:center;
       text-anchor:middle;
@@ -50,62 +73,124 @@ export function getScheduleGraph(queue: string, day: string, hours: Record<numbe
       fill-opacity:1;
       stroke:none;
     }
+    .text {
+      font-weight:600;
+      font-family:"Segoe UI";
+      text-align:center;
+      text-anchor:middle;
+      fill:${colors.text};
+      fill-opacity:1;
+      stroke:none;
+      stroke-width:.5
+      ;stroke-linecap:round;
+      stroke-miterlimit:0;
+      stroke-dasharray:none;
+      stroke-opacity:1;
+  }
     </style>
     <g>
-      <path id="h0" d="M74.648-9.873A52.917 52.917 0 0 1 60.952-8.07v-52.917Z" class="segment ${cls[0]}" transform="scale(1 -1)"/>
-      <path id="h1" d="M87.406-15.127a52.917 52.917 0 0 1-12.762 5.286L60.948-60.955Z" class="segment ${cls[1]}" transform="scale(1 -1)"/>
-      <path id="h2" d="M98.352-23.51a52.917 52.917 0 0 1-10.96 8.41L60.936-60.927Z" class="segment ${cls[2]}" transform="scale(1 -1)"/>
-      <path id="h3" d="M106.74-34.448a52.917 52.917 0 0 1-8.409 10.96L60.914-60.906Z" class="segment ${cls[3]}" transform="scale(1 -1)"/>
-      <path id="h4" d="M112-47.197a52.917 52.917 0 0 1-5.287 12.762L60.886-60.893Z" class="segment ${cls[4]}" transform="scale(1 -1)"/>
-      <path id="h5" d="M113.77-60.888a52.917 52.917 0 0 1-1.802 13.695L60.854-60.888Z" class="segment ${cls[5]}" transform="scale(1 -1)"/>
-      <path id="h6" d="M113.77 60.722a52.917 52.917 0 0 1-1.802 13.696L60.854 60.722Z" class="segment ${cls[6]}"/>
-      <path id="h7" d="M112 74.413a52.917 52.917 0 0 1-5.287 12.763L60.886 60.717Z" class="segment ${cls[7]}"/>
-      <path id="h8" d="M106.74 87.163a52.917 52.917 0 0 1-8.409 10.959L60.914 60.704Z" class="segment ${cls[8]}"/>
-      <path id="h9" d="M98.352 98.1a52.917 52.917 0 0 1-10.959 8.41L60.935 60.683Z" class="segment ${cls[9]}"/>
-      <path id="h10" d="M87.406 106.483a52.917 52.917 0 0 1-12.762 5.286L60.948 60.656Z" class="segment ${cls[10]}"/>
-      <path id="h11" d="M74.648 111.737a52.917 52.917 0 0 1-13.696 1.804V60.624Z" class="segment ${cls[11]}"/>
-      <path id="h12" d="M-47.192 111.737a52.917 52.917 0 0 1-13.696 1.804V60.624Z" class="segment ${cls[12]}" transform="scale(-1 1)"/>
-      <path id="h13" d="M-34.434 106.483a52.917 52.917 0 0 1-12.763 5.286l-13.696-51.113Z" class="segment ${cls[13]}" transform="scale(-1 1)"/>
-      <path id="h14" d="M-23.488 98.1a52.917 52.917 0 0 1-10.96 8.41l-26.458-45.827Z" class="segment ${cls[14]}" transform="scale(-1 1)"/>
-      <path id="h15" d="M-15.1 87.163a52.917 52.917 0 0 1-8.41 10.959l-37.417-37.418Z" class="segment ${cls[15]}" transform="scale(-1 1)"/>
-      <path id="h16" d="M-9.84 74.413a52.917 52.917 0 0 1-5.287 12.763l-45.827-26.459Z" class="segment ${cls[16]}" transform="scale(-1 1)"/>
-      <path id="h17" d="M-8.07 60.722a52.917 52.917 0 0 1-1.803 13.696l-51.113-13.696Z" class="segment ${cls[17]}" transform="scale(-1 1)"/>
-      <path id="h18" d="M-8.07-60.888a52.917 52.917 0 0 1-1.803 13.695l-51.113-13.695Z" class="segment ${cls[18]}" transform="scale(-1)"/>
-      <path id="h19" d="M-9.84-47.197a52.917 52.917 0 0 1-5.287 12.762l-45.827-26.458Z" class="segment ${cls[19]}" transform="scale(-1)"/>
-      <path id="h20" d="M-15.1-34.448a52.917 52.917 0 0 1-8.41 10.96l-37.417-37.418z" class="segment ${cls[20]}" transform="scale(-1)"/>
-      <path id="h21" d="M-23.488-23.51a52.917 52.917 0 0 1-10.96 8.41l-26.458-45.827z" class="segment ${cls[21]}" transform="scale(-1)"/>
-      <path id="h22" d="M-34.434-15.127a52.917 52.917 0 0 1-12.763 5.286l-13.696-51.114Z" class="segment ${cls[22]}" transform="scale(-1)"/>
-      <path id="h23" d="M-47.192-9.873A52.917 52.917 0 0 1-60.888-8.07v-52.917Z" class="segment ${cls[23]}" transform="scale(-1)"/>
+      <path d="M50 7.25a42.75 42.75 0 0 1 11.065 1.456L50 50Z" class="segment-container"/>
+      <path d="M50 7.25a42.75 42.75 0 0 1 5.58.366L50 50Z" class="segment ${cls[0]}"/>
+      <path d="M55.58 7.616a42.75 42.75 0 0 1 5.485 1.09L50 50Z" class="segment ${cls[1]}"/>
+      <path d="M61.065 8.706a42.75 42.75 0 0 1 10.31 4.271L50 50Z" class="segment-container"/>
+      <path d="M61.065 8.706a42.75 42.75 0 0 1 5.295 1.798L50 50Z" class="segment ${cls[2]}"/>
+      <path d="M66.36 10.504a42.75 42.75 0 0 1 5.015 2.473L50 50Z" class="segment ${cls[3]}"/>
+      <path d="M71.375 12.977a42.75 42.75 0 0 1 8.854 6.794L50 50Z" class="segment-container"/>
+      <path d="M71.375 12.977a42.75 42.75 0 0 1 4.65 3.107L50 50Z" class="segment ${cls[4]}"/>
+      <path d="M76.025 16.084a42.75 42.75 0 0 1 4.204 3.687L50 50Z" class="segment ${cls[5]}"/>
+      <path d="M80.229 19.771a42.75 42.75 0 0 1 6.794 8.854L50 50Z" class="segment-container"/>
+      <path d="M80.229 19.771a42.75 42.75 0 0 1 3.687 4.204L50 50Z" class="segment ${cls[6]}"/>
+      <path d="M83.916 23.975a42.75 42.75 0 0 1 3.107 4.65L50 50Z" class="segment ${cls[7]}"/>
+      <path d="M87.023 28.625a42.75 42.75 0 0 1 4.27 10.31L50 50Z" class="segment-container"/>
+      <path d="M87.023 28.625a42.75 42.75 0 0 1 2.473 5.015L50 50Z" class="segment ${cls[8]}"/>
+      <path d="M89.496 33.64a42.75 42.75 0 0 1 1.798 5.295L50 50Z" class="segment ${cls[9]}"/>
+      <path d="M91.294 38.935A42.75 42.75 0 0 1 92.75 50H50Z" class="segment-container"/>
+      <path d="M91.294 38.935a42.75 42.75 0 0 1 1.09 5.485L50 50Z" class="segment ${cls[10]}"/>
+      <path d="M92.384 44.42A42.75 42.75 0 0 1 92.75 50H50Z" class="segment ${cls[11]}"/>
+      <path d="M92.75 50a42.75 42.75 0 0 1-1.456 11.065L50 50Z" class="segment-container"/>
+      <path d="M92.75 50a42.75 42.75 0 0 1-.366 5.58L50 50Z" class="segment ${cls[12]}"/>
+      <path d="M92.384 55.58a42.75 42.75 0 0 1-1.09 5.485L50 50Z" class="segment ${cls[13]}"/>
+      <path d="M91.294 61.065a42.75 42.75 0 0 1-4.271 10.31L50 50Z" class="segment-container"/>
+      <path d="M91.294 61.065a42.75 42.75 0 0 1-1.798 5.295L50 50Z" class="segment ${cls[14]}"/>
+      <path d="M89.496 66.36a42.75 42.75 0 0 1-2.473 5.015L50 50Z" class="segment ${cls[15]}"/>
+      <path d="M87.023 71.375a42.75 42.75 0 0 1-6.794 8.854L50 50Z" class="segment-container"/>
+      <path d="M87.023 71.375a42.75 42.75 0 0 1-3.107 4.65L50 50Z" class="segment ${cls[16]}"/>
+      <path d="M83.916 76.025a42.75 42.75 0 0 1-3.687 4.204L50 50Z" class="segment ${cls[17]}"/>
+      <path d="M80.229 80.229a42.75 42.75 0 0 1-8.854 6.794L50 50Z" class="segment-container"/>
+      <path d="M80.229 80.229a42.75 42.75 0 0 1-4.204 3.687L50 50Z" class="segment ${cls[18]}"/>
+      <path d="M76.025 83.916a42.75 42.75 0 0 1-4.65 3.107L50 50Z" class="segment ${cls[19]}"/>
+      <path d="M71.375 87.023a42.75 42.75 0 0 1-10.31 4.27L50 50Z" class="segment-container"/>
+      <path d="M71.375 87.023a42.75 42.75 0 0 1-5.015 2.473L50 50Z" class="segment ${cls[20]}"/>
+      <path d="M66.36 89.496a42.75 42.75 0 0 1-5.295 1.798L50 50Z" class="segment ${cls[21]}"/>
+      <path d="M61.065 91.294A42.75 42.75 0 0 1 50 92.75V50Z" class="segment-container"/>
+      <path d="M61.065 91.294a42.75 42.75 0 0 1-5.485 1.09L50 50Z" class="segment ${cls[22]}"/>
+      <path d="M55.58 92.384a42.75 42.75 0 0 1-5.58.366V50Z" class="segment ${cls[23]}"/>
+      <path d="M50 92.75a42.75 42.75 0 0 1-11.065-1.456L50 50Z" class="segment-container"/>
+      <path d="M50 92.75a42.75 42.75 0 0 1-5.58-.366L50 50Z" class="segment ${cls[24]}"/>
+      <path d="M44.42 92.384a42.75 42.75 0 0 1-5.485-1.09L50 50Z" class="segment ${cls[25]}"/>
+      <path d="M38.935 91.294a42.75 42.75 0 0 1-10.31-4.271L50 50Z" class="segment-container"/>
+      <path d="M38.935 91.294a42.75 42.75 0 0 1-5.295-1.798L50 50Z" class="segment ${cls[26]}"/>
+      <path d="M33.64 89.496a42.75 42.75 0 0 1-5.015-2.473L50 50Z" class="segment ${cls[27]}"/>
+      <path d="M28.625 87.023a42.75 42.75 0 0 1-8.854-6.794L50 50Z" class="segment-container"/>
+      <path d="M28.625 87.023a42.75 42.75 0 0 1-4.65-3.107L50 50Z" class="segment ${cls[28]}"/>
+      <path d="M23.975 83.916a42.75 42.75 0 0 1-4.204-3.687L50 50Z" class="segment ${cls[29]}"/>
+      <path d="M19.771 80.229a42.75 42.75 0 0 1-6.794-8.854L50 50Z" class="segment-container"/>
+      <path d="M19.771 80.229a42.75 42.75 0 0 1-3.687-4.204L50 50Z" class="segment ${cls[30]}"/>
+      <path d="M16.084 76.025a42.75 42.75 0 0 1-3.107-4.65L50 50Z" class="segment ${cls[31]}"/>
+      <path d="M12.977 71.375a42.75 42.75 0 0 1-4.27-10.31L50 50Z" class="segment-container"/>
+      <path d="M12.977 71.375a42.75 42.75 0 0 1-2.473-5.015L50 50Z" class="segment ${cls[32]}"/>
+      <path d="M10.504 66.36a42.75 42.75 0 0 1-1.798-5.295L50 50Z" class="segment ${cls[33]}"/>
+      <path d="M8.706 61.065A42.75 42.75 0 0 1 7.25 50H50Z" class="segment-container"/>
+      <path d="M8.706 61.065a42.75 42.75 0 0 1-1.09-5.485L50 50Z" class="segment ${cls[34]}"/>
+      <path d="M7.616 55.58A42.75 42.75 0 0 1 7.25 50H50Z" class="segment ${cls[35]}"/>
+      <path d="M7.25 50a42.75 42.75 0 0 1 1.456-11.065L50 50Z" class="segment-container"/>
+      <path d="M7.25 50a42.75 42.75 0 0 1 .366-5.58L50 50Z" class="segment ${cls[36]}"/>
+      <path d="M7.616 44.42a42.75 42.75 0 0 1 1.09-5.485L50 50Z" class="segment ${cls[37]}"/>
+      <path d="M8.706 38.935a42.75 42.75 0 0 1 4.271-10.31L50 50Z" class="segment-container"/>
+      <path d="M8.706 38.935a42.75 42.75 0 0 1 1.798-5.295L50 50Z" class="segment ${cls[38]}"/>
+      <path d="M10.504 33.64a42.75 42.75 0 0 1 2.473-5.015L50 50Z" class="segment ${cls[39]}"/>
+      <path d="M12.977 28.625a42.75 42.75 0 0 1 6.794-8.854L50 50Z" class="segment-container"/>
+      <path d="M12.977 28.625a42.75 42.75 0 0 1 3.107-4.65L50 50Z" class="segment ${cls[40]}"/>
+      <path d="M16.084 23.975a42.75 42.75 0 0 1 3.687-4.204L50 50Z" class="segment ${cls[41]}"/>
+      <path d="M19.771 19.771a42.75 42.75 0 0 1 8.854-6.794L50 50Z" class="segment-container"/>
+      <path d="M19.771 19.771a42.75 42.75 0 0 1 4.204-3.687L50 50Z" class="segment ${cls[42]}"/>
+      <path d="M23.975 16.084a42.75 42.75 0 0 1 4.65-3.107L50 50Z" class="segment ${cls[43]}"/>
+      <path d="M28.625 12.977a42.75 42.75 0 0 1 10.31-4.27L50 50Z" class="segment-container"/>
+      <path d="M28.625 12.977a42.75 42.75 0 0 1 5.015-2.473L50 50Z" class="segment ${cls[44]}"/>
+      <path d="M33.64 10.504a42.75 42.75 0 0 1 5.295-1.798L50 50Z" class="segment ${cls[45]}"/>
+      <path d="M38.935 8.706A42.75 42.75 0 0 1 50 7.25V50Z" class="segment-container"/>
+      <path d="M38.935 8.706a42.75 42.75 0 0 1 5.485-1.09L50 50Z" class="segment ${cls[46]}"/>
+      <path d="M44.42 7.616A42.75 42.75 0 0 1 50 7.25V50Z" class="segment ${cls[47]}"/>
 
-      <circle cx="60.854" cy="60.722" r="26.458" style="fill:${colors.background};stroke-width:.0015774;stroke-linecap:round;stroke-miterlimit:2.5"/>
+      <circle cx="50" cy="50" r="22" style="fill:${colors.background};fill-opacity:1;stroke:none;stroke-width:.592272;stroke-linecap:round;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"/>
 
-      <text x="60.819" y="6.3" class="hour">0</text>
-      <text x="75.309" y="8.06" class="hour">1</text>
-      <text x="89.349" y="13.757" class="hour">2</text>
-      <text x="100.982" y="22.811" class="hour">3</text>
-      <text x="109.752" y="34.218" class="hour">4</text>
-      <text x="115.528" y="48.003" class="hour">5</text>
-      <text x="117.469" y="62.362" class="hour">6</text>
-      <text x="115.595" y="76.94" class="hour">7</text>
-      <text x="110.436" y="90.434" class="hour">8</text>
-      <text x="101.109" y="102.142" class="hour">9</text>
-      <text x="89.269" y="112.064" class="hour">10</text>
-      <text x="75.312" y="117.223" class="hour">11</text>
-      <text x="61.289" y="119.406" class="hour">12</text>
-      <text x="46.076" y="117.752" class="hour">13</text>
-      <text x="31.677" y="112.227" class="hour">14</text>
-      <text x="19.313" y="102.371" class="hour">15</text>
-      <text x="10.657" y="90.628" class="hour">16</text>
-      <text x="5.503" y="76.756" class="hour">17</text>
-      <text x="3.506" y="62.295" class="hour">18</text>
-      <text x="5.384" y="48.165" class="hour">19</text>
-      <text x="10.969" y="33.864" class="hour">20</text>
-      <text x="20.511" y="22.005" class="hour">21</text>
-      <text x="33.324" y="12.949" class="hour">22</text>
-      <text x="46.461" y="8.023" class="hour">23</text>
+      <text x="49.936" y="5.325" class="hour">0</text>
+      <text x="61.37" y="7.059" class="hour">1</text>
+      <text x="73.324" y="11.477" class="hour">2</text>
+      <text x="82.358" y="18.352" class="hour">3</text>
+      <text x="89.823" y="28.283" class="hour">4</text>
+      <text x="94.528" y="39.796" class="hour">5</text>
+      <text x="95.925" y="51.879" class="hour">6</text>
+      <text x="94.661" y="63.521" class="hour">7</text>
+      <text x="90.037" y="74.346" class="hour">8</text>
+      <text x="82.904" y="84.493" class="hour">9</text>
+      <text x="72.883" y="92.493" class="hour">10</text>
+      <text x="61.867" y="96.905" class="hour">11</text>
+      <text x="50.148" y="98.22" class="hour">12</text>
+      <text x="38.024" y="96.903" class="hour">13</text>
+      <text x="26.605" y="92.493" class="hour">14</text>
+      <text x="16.87" y="85.112" class="hour">15</text>
+      <text x="8.942" y="74.878" class="hour">16</text>
+      <text x="4.568" y="63.773" class="hour">17</text>
+      <text x="3.068" y="51.86" class="hour">18</text>
+      <text x="4.606" y="40.096" class="hour">19</text>
+      <text x="8.807" y="28.706" class="hour">20</text>
+      <text x="16.448" y="18.708" class="hour">21</text>
+      <text x="26.845" y="10.999" class="hour">22</text>
+      <text x="38.125" y="6.721" class="hour">23</text>
 
-      <text x="60.996" y="60.117" style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:10.5833px;font-family:'Segoe UI';text-align:center;text-anchor:middle;fill:${colors.text};stroke:none;">${queue}</text>
-      <text x="60.72" y="67.571" style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:6.35px;font-family:'Segoe UI';text-align:center;text-anchor:middle;fill:${colors.text};stroke:none;">${day}</text>
+      <text x="50.211" y="48.903" class="text" style="font-size:10px;">${queue}</text>
+      <text x="49.962" y="57.924" class="text" style="font-size:7px;">${day}</text>
     </g>
   </svg>
   `;
