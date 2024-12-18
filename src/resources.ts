@@ -64,8 +64,8 @@ export function getScheduleGraph(queue: string, day: string, periods: Record<num
       stroke:${colors.yellow_past};
     }
     .hour {
-      font-weight:600;
-      font-size:5px;
+      font-weight:normal;
+      font-size:4px;
       font-family:"Segoe UI";
       text-align:center;
       text-anchor:middle;
