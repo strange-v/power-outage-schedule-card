@@ -45,10 +45,19 @@ export interface PowerOutageScheduleCardConfig {
   reload_action?: PowerOutageCardAction;
 }
 
+export interface Time {
+  hour: number;
+  minute: number;
+}
+export interface PowerOutagePeriod {
+  from: Time;
+  to: Time;
+  state: number;
+}
 export interface PowerOutageSchedule {
   eventDate: string;
   scheduleApprovedSince: string;
-  periods: Record<number, number>;
+  periods: PowerOutagePeriod[];
 }
 
 export interface ScheduleGraphColors {

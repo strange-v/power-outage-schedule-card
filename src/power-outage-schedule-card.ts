@@ -99,7 +99,7 @@ export class PowerOutageScheduleCard extends LitElement {
     const data: PowerOutageSchedule = {
       eventDate: '',
       scheduleApprovedSince: '',
-      periods: {}
+      periods: []
     };
     const state = this.state(id);
     const values = state.split(';');
@@ -110,11 +110,20 @@ export class PowerOutageScheduleCard extends LitElement {
     data.eventDate = values.shift()!;
     data.scheduleApprovedSince = values.shift()!;
 
-    values.forEach((v, i) => {
-      if (!v)
+    values.forEach((period, i) => {
+      if (!period)
         return;
 
-      data.periods[i] = Number(v);
+      const segments = period.split('-');
+      const [fromHour, fromMinute] = segments.shift()!.split(':').map(v => Number(v));
+      const [toHour, toMinute] = segments.shift()!.split(':').map(v => Number(v));
+      const state = Number(segments.shift()!);
+
+      data.periods.push({
+        from: { hour: fromHour, minute: fromMinute },
+        to: { hour: toHour, minute: toMinute },
+        state
+      });
     })
     return data;
   }
@@ -145,7 +154,8 @@ export class PowerOutageScheduleCard extends LitElement {
   }
 
   getRelativeDate(date: string) {
-    const inputDate = new Date(date);
+    const dateParts = date.split('.');
+    const inputDate = new Date(`${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`);
     const currentDate = new Date();
 
     const inputDateOnly = new Date(inputDate.getFullYear(), inputDate.getMonth(), inputDate.getDate());

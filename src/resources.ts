@@ -2,9 +2,11 @@ import { html, nothing } from 'lit';
 import {
   Template,
   ScheduleGraphColors,
+  PowerOutagePeriod,
+  Time,
 } from './types'
 
-export function getScheduleGraph(queue: string, day: string, periods: Record<number, number>, today: boolean, colors: ScheduleGraphColors): Template {
+export function getScheduleGraph(queue: string, day: string, periods: PowerOutagePeriod[], today: boolean, colors: ScheduleGraphColors): Template {
   const cls: Record<number, string> = {};
   const now = new Date;
   let hour = 0;
@@ -14,13 +16,19 @@ export function getScheduleGraph(queue: string, day: string, periods: Record<num
 
     if (today && (now.getHours() > hour || (now.getHours() == hour && now.getMinutes() > 30 && !(idx % 2)))) {
       cls[idx] += 'past';
-    } else {
-      debugger
     }
 
-    const value = periods[idx];
-    if (value > 0 && value <= 2)
-      cls[idx] += value == 1 ? ' red' : ' yellow';
+    const currentTime: Time = { hour: Math.floor(hour), minute: (hour % 1) * 60 };
+    for (const period of periods) {
+      const timeToNumber = (time: Time) => time.hour + time.minute / 60;
+
+      if (
+        timeToNumber(currentTime) >= timeToNumber(period.from) &&
+        timeToNumber(currentTime) < timeToNumber(period.to)
+      ) {
+        cls[idx] += period.state === 1 ? ' red' : ' yellow';
+      }
+    }
 
     hour += 0.5;
     idx += 1;

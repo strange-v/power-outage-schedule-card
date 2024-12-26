@@ -28,87 +28,140 @@ This card can be installed using [HACS](https://hacs.xyz/) (Home Assistant Commu
    4. Click Add Resource.
    5. Set the URL to `/local/power-outage-schedule-card.js` and the Resource type to `JavaScript module`
 
-## Card configuration
+## Configuration
 
-The card can be configured only using YAML (the UI editor is unsupported).
+1. Go to `Settings` - `Devices & Services` - `Helpers` and create a new `Text` helper named "OE Queue",  set the value to "2.2" (will be updated later)
+1. Add REST sensors for today and tomorrow
 
-```yaml
-type: custom:power-outage-schedule-card
-queue_entity: sensor.queue
-today_entity: sensor.today
-tomorrow_entity: sensor.tomorrow
-hide_past_hours: true
-title: Power outage schedule
-empty_text: The schedule for hourly outages will be published by the end of the day.
-reload_action:
-  service: homeassistant.update_entity
-  target: sensor.queue
-```
+    ```yaml
+    rest:
+      - resource: "https://be-svitlo.oe.if.ua/schedule-by-queue"
+        scan_interval: 1800
+        headers:
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0"
+          "Accept": "*/*"
+          "Accept-Language": "en-US,en;q=0.5"
+          "Accept-Encoding": "gzip, deflate, br, zstd"
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+          "Origin": "https://svitlo.oe.if.ua"
+          "Connection": "keep-alive"
+          "Referer": "https://svitlo.oe.if.ua/"
+        params:
+          "queue": >
+            {{ states('input_text.oe_queue') }}
+        method: GET
+        sensor:
+        - name: "OE Today"
+          unique_id: 5fd8c49686d04772be7d51c2ccdba1f5
+          value_template: >-
+            {% set today = now().strftime('%d.%m.%Y') %}
+            {%- for data in value_json %}
+              {% if data.eventDate == today %}
+                {% set queue = data.queues[states('input_text.oe_queue')] %}
+                {{ data.eventDate }};{{ data.scheduleApprovedSince }};
+                {%- for period in queue %}{{ period.from }}-{{ period.to }}-{{ period.status }};{%- endfor %}
+              {% endif %}
+            {%- endfor %}
+        - name: "OE Tomorrow"
+          unique_id: c8450a42626a4769a5f612d16f3dfc70
+          value_template: >-
+            {% set tomorrow = (now() + timedelta(days=1)).strftime('%d.%m.%Y') %}
+            {%- for data in value_json %}
+              {% if data.eventDate == tomorrow %}
+                {% set queue = data.queues[states('input_text.oe_queue')] %}
+                {{ data.eventDate }};{{ data.scheduleApprovedSince }};
+                {%- for period in queue %}{{ period.from }}-{{ period.to }}-{{ period.status }};{%- endfor %}
+              {% endif %}
+            {%- endfor %}
+    ```
 
-## Data retrieval
+1. Configure automatic update of the OE Queue
+    1. Add a new rest sensor
 
-You can use your address or personal account number to fetch the actual data about power outages.
-Put your oblenergo personal account number into the `accountNumber` parameter or your address (e.g., `Івано-Франківськ,Індустріальна,32`) into the `address` parameter.
+        ```yaml
+        - resource: "https://be-svitlo.oe.if.ua/GavGroupByAccountNumber"
+          scan_interval: 3600
+          headers:
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0"
+            "Accept": "*/*"
+            "Accept-Language": "en-US,en;q=0.5"
+            "Accept-Encoding": "gzip, deflate, br, zstd"
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+            "Origin": "https://svitlo.oe.if.ua"
+            "Connection": "keep-alive"
+            "Referer": "https://svitlo.oe.if.ua/"
+          params:
+            "accountNumber": "XXXXXXXX"
+            "userSearchChoice": "pob"
+            "address": ""
+          method: POST
+          sensor:
+          - name: "OE Queue"
+            unique_id: 3ac7ab5e3ce64c558f86dd6c9c600677
+            value_template: >-
+              {% set data = value_json['current'] %}
+              {% if data.hasQueue == "yes" %}
+                {{ data.queue }}.{{ data.subqueue }}
+              {% else %}
+                unknown
+              {% endif %}
+        ```
 
-```yaml
-rest:
-  - resource: "https://be-svitlo.oe.if.ua/GavGroupByAccountNumber"
-    scan_interval: 3600
-    headers:
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0"
-      "Accept": "*/*"
-      "Accept-Language": "en-US,en;q=0.5"
-      "Accept-Encoding": "gzip, deflate, br, zstd"
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
-      "Origin": "https://svitlo.oe.if.ua"
-      "Connection": "keep-alive"
-      "Referer": "https://svitlo.oe.if.ua/"
-    params:
-      "accountNumber": "XXXXXXXX"
-      "userSearchChoice": "pob"
-      "address": ""
-    method: POST
-    sensor:
-    - name: "OE Queue"
-      unique_id: 3ac7ab5e3ce64c558f86dd6c9c600677
-      value_template: >-
-        {% set data = value_json['current'] %}
-        {% if data.hasQueue == "yes" %}
-          {{ data.queue }}.{{ data.subqueue }}
-        {% else %}
-          No queue
-        {% endif %}
-    - name: "OE Today"
-      unique_id: f8f18ae743474e31b9663aea35899241
-      value_template: >-
-        {% set data = value_json['current'] %}
-        {% if data.hasQueue == "yes" and 'today' in value_json['graphs'] %}
-          {% set graph = value_json['graphs']['today'] %}
-          {% if graph %}
-            {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList|sort(attribute='periodLimitValue') %}{{ hour.electricity }};{% endfor %}
-          {% else %}
-            none
-          {% endif %}
-        {% else %}
-          none
-        {% endif %}
-    - name: "OE Tomorrow"
-      unique_id: 30ae7b0bc3fd4da8ad2c2ab5678c522e
-      value_template: >-
-        {% set data = value_json['current'] %}
-        {% if data.hasQueue == "yes" and 'tomorrow' in value_json['graphs'] %}
-          {% set graph = value_json['graphs']['tomorrow'] %}
-          {% if graph %}
-            {{ graph.eventDate }};{{ graph.scheduleApprovedSince }};{% for hour in graph.hoursList|sort(attribute='periodLimitValue') %}{{ hour.electricity }};{% endfor %}
-          {% else %}
-            none
-          {% endif %}
-        {% else %}
-          none
-        {% endif %}
-```
+        You can use your address or personal account number to fetch the actual data about your queue.
+        Put your oblenergo personal account number into the `accountNumber` parameter or your address (e.g., `Івано-Франківськ,Індустріальна,32`) into the `address` parameter.
+    1. Add automation that updates the previously created `Text` helper and related sensors
+
+        ```yaml
+        alias: Update OE Queue
+        description: ""
+        triggers:
+        - trigger: state
+            entity_id:
+            - sensor.queue
+            to: null
+            id: queue
+        conditions:
+        - condition: not
+            conditions:
+            - condition: state
+                entity_id: sensor.queue
+                state: unavailable
+            - condition: state
+                entity_id: sensor.queue
+                state: unknown
+        actions:
+        - action: input_text.set_value
+            metadata: {}
+            data:
+            value: "{{ states('sensor.queue') }}"
+            target:
+            entity_id: input_text.oe_queue
+        - action: homeassistant.update_entity
+            data:
+            entity_id:
+                - sensor.oe_today
+        mode: single
+        ```
+
+1. Configure the card using YAML (the UI editor is unsupported)
+
+    ```yaml
+    type: custom:power-outage-schedule-card
+    queue_entity: input_text.oe_queue
+    today_entity: sensor.oe_today
+    tomorrow_entity: sensor.oe_tomorrow
+    hide_past_hours: true
+    title: Power outage schedule
+    empty_text: The schedule for hourly outages will be published by the end of the day.
+    reload_action:
+    service: homeassistant.update_entity
+    target: sensor.oe_queue
+    ```
 
 ## Notifications
+
+[!CAUTION]
+Notifications do not work with the latest API format but it'll be fixed soon.
 
 ![Notification: power outage schedule added](/images/notification_schedule_added.png) ![Notification: power outage schedule changed](/images/notification_schedule_changed.png)
 
