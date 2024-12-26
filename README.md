@@ -160,8 +160,8 @@ This card can be installed using [HACS](https://hacs.xyz/) (Home Assistant Commu
 
 ## Notifications
 
-[!CAUTION]
-Notifications do not work with the latest API format but it'll be fixed soon.
+> [!CAUTION]
+> Notifications do not work with the latest API format but it'll be fixed soon.
 
 ![Notification: power outage schedule added](/images/notification_schedule_added.png) ![Notification: power outage schedule changed](/images/notification_schedule_changed.png)
 
