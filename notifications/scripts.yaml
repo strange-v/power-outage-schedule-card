@@ -5,7 +5,7 @@ script:
     - if:
       - condition: template
         value_template: >-
-          {% set is_valid = current != 'none' and current != 'unavailable' and previous != 'none' and previous != 'unavailable' %}
+          {% set is_valid = current != 'unknown' and current != 'unavailable' and previous != 'unavailable' %}
           {% set current_date = current.split(';')[0] %}
           {% set previous_date = previous.split(';')[0] %}
           {% set current_data = ';'.join(current.split(';')[2:]) %}
@@ -21,35 +21,52 @@ script:
               {% set current_data = current.split(';')[2:] %}
               {% set previous_data = previous.split(';')[2:] %}
               {% set ns = namespace(current_green=0, current_red=0, current_yellow=0, previous_green=0, previous_red=0, previous_yellow=0) %}
-              {% for state in current_data %}
-                {% if state == '0' %}
-                  {% set ns.current_green = ns.current_green + 0.5 %}
-                {% elif state == '1' %}
-                  {% set ns.current_red = ns.current_red + 0.5 %}
-                {% elif state == '2' %}
-                {% set ns.current_yellow = ns.current_yellow + 0.5 %}
+
+              {% for period in current_data %}
+                {% if period %}
+                  {% set parts = period.split('-') %}
+                  {% set start = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[0]) %}
+                  {% set end = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[1]) %}
+                  {% set state = parts[2] %}
+                  {% set duration = (end - start) / 3600 %}
+                  
+                  {% if state == '1' %}
+                    {% set ns.current_red = ns.current_red + duration %}
+                  {% elif state == '2' %}
+                    {% set ns.current_yellow = ns.current_yellow + duration %}
+                  {% endif %}
                 {% endif %}
               {% endfor %}
-              {% for state in previous_data %}
-                {% if state == '0' %}
-                  {% set ns.previous_green = ns.previous_green + 0.5 %}
-                {% elif state == '1' %}
-                  {% set ns.previous_red = ns.previous_red + 0.5 %}
-                {% elif state == '2' %}
-                  {% set ns.previous_yellow = ns.previous_yellow + 0.5 %}
+              {% set ns.current_green = 24 - ns.current_red - ns.current_yellow %}
+
+              {% for period in previous_data %}
+                {% if period %}
+                  {% set parts = period.split('-') %}
+                  {% set start = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[0]) %}
+                  {% set end = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[1]) %}
+                  {% set state = parts[2] %}
+                  {% set duration = (end - start) / 3600 %}
+                  
+                  {% if state == '1' %}
+                    {% set ns.previous_red = ns.previous_red + duration %}
+                  {% elif state == '2' %}
+                    {% set ns.previous_yellow = ns.previous_yellow + duration %}
+                  {% endif %}
                 {% endif %}
               {% endfor %}
+              {% set ns.previous_green = 24 - ns.previous_red - ns.previous_yellow %}
+              
               {% if ns.current_green != ns.previous_green %}
                 {% set diff = ns.current_green - ns.previous_green %}
-                {% if diff > 0 %} Plus {% else %} Minus {% endif %} {{ '{:.1f}'.format(diff|float|abs).rstrip('0').rstrip('.') }} {% if diff | abs == 1 %} hour {% else %} hours {% endif %} of electricity for {{ day }}.
+                {% if diff > 0 %} Plus {% else %} Minus {% endif %} {{ '{:.1f}'.format(diff|float|abs).rstrip('0').rstrip('.') }} {% if diff | abs == 1 %}hour{% else %}hours{% endif %} of electricity for {{ day }}.
               {%- endif %}
               {%- if ns.current_red != ns.previous_red %}
                 {%- set diff = ns.current_red - ns.previous_red %}
-                {% if diff > 0 %} + {% else %} - {% endif %}{{ '{:.1f}'.format(diff|float|abs).rstrip('0').rstrip('.') }} {% if diff | abs == 1 %} hour {% else %} hours {% endif %} in red zone.
+                {% if diff > 0 %} + {% else %} - {% endif %}{{ '{:.1f}'.format(diff|float|abs).rstrip('0').rstrip('.') }} {% if diff | abs == 1 %}hour{% else %}hours{% endif %} in red zone.
               {%- endif %}
               {%- if ns.current_yellow != ns.previous_yellow %}
                 {%- set diff = ns.current_yellow - ns.previous_yellow %}
-                {% if diff > 0 %} + {% else %} - {% endif %}{{ '{:.1f}'.format(diff|float|abs).rstrip('0').rstrip('.') }} {% if diff | abs == 1 %} hour {% else %} hours {% endif %} in yellow zone.
+                {% if diff > 0 %} + {% else %} - {% endif %}{{ '{:.1f}'.format(diff|float|abs).rstrip('0').rstrip('.') }} {% if diff | abs == 1 %}hour{% else %}hours{% endif %} in yellow zone.
               {% endif %}
     fields:
       previous:
@@ -75,7 +92,7 @@ script:
       - if:
           - condition: template
             value_template: >-
-              {% set is_valid = current != 'none' and current != 'unavailable' and previous == 'none' %}
+              {% set is_valid = current != 'unknown' and current != 'unavailable' %}
               {% set is_different = current != previous %}
               {{ is_valid and is_different }}
         then:
@@ -87,21 +104,28 @@ script:
               {% set current_data = current.split(';')[2:] %}
               {% set ns = namespace(current_green=0.0, current_red=0.0, current_yellow=0.0) %}
 
-              {% for state in current_data %}
-                {% if state == '0' %}
-                  {% set ns.current_green = ns.current_green + 0.5 %}
-                {% elif state == '1' %}
-                  {% set ns.current_red = ns.current_red + 0.5 %}
-                {% elif state == '2' %}
-                  {% set ns.current_yellow = ns.current_yellow + 0.5 %}
+              {% for period in current_data %}
+                {% if period %}
+                  {% set parts = period.split('-') %}
+                  {% set start = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[0]) %}
+                  {% set end = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[1]) %}
+                  {% set state = parts[2] %}
+                  {% set duration = (end - start) / 3600 %}
+                  
+                  {% if state == '1' %}
+                    {% set ns.current_red = ns.current_red + duration %}
+                  {% elif state == '2' %}
+                    {% set ns.current_yellow = ns.current_yellow + duration %}
+                  {% endif %}
                 {% endif %}
               {% endfor %}
+              {% set ns.current_green = 24 - ns.current_red - ns.current_yellow %}
 
-              You will have {{ '{:.1f}'.format(ns.current_green|float).rstrip('0').rstrip('.') }} {% if ns.current_green == 1 %} hour {% else %} hours {% endif %} of electricity.
+              You will have {{ '{:.1f}'.format(ns.current_green|float).rstrip('0').rstrip('.') }} {% if ns.current_green == 1 %}hour{% else %}hours{% endif %} of electricity.
 
-              {% if ns.current_red > 0 %} {{ '{:.1f}'.format(ns.current_red|float).rstrip('0').rstrip('.') }} {% if ns.current_red == 1 %} hour {% else %} hours {% endif %} in red zone. {% endif %}
+              {% if ns.current_red > 0 %} {{ '{:.1f}'.format(ns.current_red|float).rstrip('0').rstrip('.') }} {% if ns.current_red == 1 %}hour{% else %}hours{% endif %} in red zone. {% endif %}
 
-              {% if ns.current_yellow > 0 %} {{ '{:.1f}'.format(ns.current_yellow|float).rstrip('0').rstrip('.') }} {% if ns.current_yellow == 1 %} hour {% else %} hours {% endif %} in yellow zone. {% endif %}
+              {% if ns.current_yellow > 0 %} {{ '{:.1f}'.format(ns.current_yellow|float).rstrip('0').rstrip('.') }} {% if ns.current_yellow == 1 %}hour{% else %}hours{% endif %} in yellow zone. {% endif %}
           action: notify.notifyfamily
     fields:
       previous:

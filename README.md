@@ -55,24 +55,28 @@ This card can be installed using [HACS](https://hacs.xyz/) (Home Assistant Commu
           unique_id: 5fd8c49686d04772be7d51c2ccdba1f5
           value_template: >-
             {% set today = now().strftime('%d.%m.%Y') %}
-            {%- for data in value_json %}
-              {% if data.eventDate == today %}
-                {% set queue = data.queues[states('input_text.oe_queue')] %}
-                {{ data.eventDate }};{{ data.scheduleApprovedSince }};
-                {%- for period in queue %}{{ period.from }}-{{ period.to }}-{{ period.status }};{%- endfor %}
-              {% endif %}
-            {%- endfor %}
+            {% set data = value_json | selectattr("eventDate", "equalto", today) | list %}
+            {% if data | length > 0 %}
+              {% set data = data | last %}
+              {% set queue = data.queues[states('input_text.oe_queue')] %}
+              {{ data.eventDate }};{{ data.scheduleApprovedSince }};
+              {%- for period in queue %}{{ period.from }}-{{ period.to }}-{{ period.status }};{%- endfor %}
+            {% else %}
+              unknown
+            {% endif %}
         - name: "OE Tomorrow"
           unique_id: c8450a42626a4769a5f612d16f3dfc70
           value_template: >-
             {% set tomorrow = (now() + timedelta(days=1)).strftime('%d.%m.%Y') %}
-            {%- for data in value_json %}
-              {% if data.eventDate == tomorrow %}
-                {% set queue = data.queues[states('input_text.oe_queue')] %}
-                {{ data.eventDate }};{{ data.scheduleApprovedSince }};
-                {%- for period in queue %}{{ period.from }}-{{ period.to }}-{{ period.status }};{%- endfor %}
-              {% endif %}
-            {%- endfor %}
+            {% set data = value_json | selectattr("eventDate", "equalto", tomorrow) | list %}
+            {% if data | length > 0 %}
+              {% set data = data | last %}
+              {% set queue = data.queues[states('input_text.oe_queue')] %}
+              {{ data.eventDate }};{{ data.scheduleApprovedSince }};
+              {%- for period in queue %}{{ period.from }}-{{ period.to }}-{{ period.status }};{%- endfor %}
+            {% else %}
+              unknown
+            {% endif %}
     ```
 
 1. Configure automatic update of the OE Queue

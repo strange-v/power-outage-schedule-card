@@ -12,29 +12,29 @@ Each notification consists of automation and script.
 ```yaml
 alias: Power outage schedule added
 description: Notifies when a power schedule for today or tomorrow is added
-trigger:
-  - platform: state
-    entity_id:
-      - sensor.today
+triggers:
+  - entity_id:
+      - sensor.oe_today
     to: null
     id: today
     for:
       hours: 0
       minutes: 0
       seconds: 5
-    from: none
-  - platform: state
-    entity_id:
-      - sensor.tomorrow
+    from: unknown
+    trigger: state
+  - entity_id:
+      - sensor.oe_tomorrow
     to: null
     id: tomorrow
     for:
       hours: 0
       minutes: 0
       seconds: 5
-    from: none
-condition: []
-action:
+    from: unknown
+    trigger: state
+conditions: []
+actions:
   - choose:
       - conditions:
           - condition: trigger
@@ -64,27 +64,27 @@ mode: single
 ```yaml
 alias: Power outage schedule changed
 description: Notifies when an existing schedule for today or tomorrow changes
-trigger:
-  - platform: state
-    entity_id:
-      - sensor.today
+triggers:
+  - entity_id:
+      - sensor.oe_today
     to: null
     id: today
     for:
       hours: 0
       minutes: 0
       seconds: 5
-  - platform: state
-    entity_id:
-      - sensor.tomorrow
+    trigger: state
+  - entity_id:
+      - sensor.oe_tomorrow
     to: null
     id: tomorrow
     for:
       hours: 0
       minutes: 0
       seconds: 5
-condition: []
-action:
+    trigger: state
+conditions: []
+actions:
   - choose:
       - conditions:
           - condition: trigger
