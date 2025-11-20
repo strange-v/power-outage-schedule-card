@@ -11,21 +11,26 @@ export function getScheduleGraph(queue: string, day: string, periods: PowerOutag
   const now = new Date;
   let hour = 0;
   let idx = 0;
-  while (hour <= 24) {
+  while (hour < 24) {
     cls[idx] = '';
 
     if (today && (now.getHours() > hour || (now.getHours() == hour && now.getMinutes() > 30 && !(idx % 2)))) {
       cls[idx] += 'past';
     }
 
+    const timeToNumber = (time: Time) => time.hour + time.minute / 60;
     const currentTime: Time = { hour: Math.floor(hour), minute: (hour % 1) * 60 };
-    for (const period of periods) {
-      const timeToNumber = (time: Time) => time.hour + time.minute / 60;
+    const current = timeToNumber(currentTime);
 
-      if (
-        timeToNumber(currentTime) >= timeToNumber(period.from) &&
-        timeToNumber(currentTime) < timeToNumber(period.to)
-      ) {
+    for (const period of periods) {
+      let from = timeToNumber(period.from);
+      let to   = timeToNumber(period.to);
+
+      if (to === 0 && from > 0) {
+        to = 24;
+      }
+
+      if (current >= from && current < to) {
         cls[idx] += period.state === 1 ? ' red' : ' yellow';
       }
     }

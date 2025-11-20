@@ -16,7 +16,7 @@ script:
           data:
             title: Power outage schedule changed
             data:
-              clickAction: /ui-lovelace-minimalist/power
+              clickAction: /dashboard-mobile/0#power-pop-up
             message: >-
               {% set current_data = current.split(';')[2:] %}
               {% set previous_data = previous.split(';')[2:] %}
@@ -25,10 +25,16 @@ script:
               {% for period in current_data %}
                 {% if period %}
                   {% set parts = period.split('-') %}
-                  {% set start = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[0]) %}
-                  {% set end = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[1]) %}
                   {% set state = parts[2] %}
-                  {% set duration = (end - start) / 3600 %}
+                  {% set start_s = parts[0].split(':') %}
+                  {% set end_s = parts[1].split(':') %}
+                  {% set start_h = (start_s[0] | int) + (start_s[1] | int) / 60 %}
+                  {% set end_h = (end_s[0] | int) + (end_s[1] | int) / 60 %}
+                  {% if end_h <= start_h %}
+                    {% set duration = (24 - start_h) + end_h %}
+                  {% else %}
+                    {% set duration = end_h - start_h %}
+                  {% endif %}
                   
                   {% if state == '1' %}
                     {% set ns.current_red = ns.current_red + duration %}
@@ -42,10 +48,16 @@ script:
               {% for period in previous_data %}
                 {% if period %}
                   {% set parts = period.split('-') %}
-                  {% set start = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[0]) %}
-                  {% set end = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[1]) %}
                   {% set state = parts[2] %}
-                  {% set duration = (end - start) / 3600 %}
+                  {% set start_s = parts[0].split(':') %}
+                  {% set end_s = parts[1].split(':') %}
+                  {% set start_h = (start_s[0] | int) + (start_s[1] | int) / 60 %}
+                  {% set end_h = (end_s[0] | int) + (end_s[1] | int) / 60 %}
+                  {% if end_h <= start_h %}
+                    {% set duration = (24 - start_h) + end_h %}
+                  {% else %}
+                    {% set duration = end_h - start_h %}
+                  {% endif %}
                   
                   {% if state == '1' %}
                     {% set ns.previous_red = ns.previous_red + duration %}
@@ -99,7 +111,7 @@ script:
         - data:
             title: Power outage schedule for {{ day }}
             data:
-              clickAction: /ui-lovelace-minimalist/power
+              clickAction: /dashboard-mobile/0#power-pop-up
             message: >-
               {% set current_data = current.split(';')[2:] %}
               {% set ns = namespace(current_green=0.0, current_red=0.0, current_yellow=0.0) %}
@@ -107,10 +119,16 @@ script:
               {% for period in current_data %}
                 {% if period %}
                   {% set parts = period.split('-') %}
-                  {% set start = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[0]) %}
-                  {% set end = as_timestamp(now().strftime('%Y-%m-%d') ~ 'T' ~ parts[1]) %}
                   {% set state = parts[2] %}
-                  {% set duration = (end - start) / 3600 %}
+                  {% set start_s = parts[0].split(':') %}
+                  {% set end_s = parts[1].split(':') %}
+                  {% set start_h = (start_s[0] | int) + (start_s[1] | int) / 60 %}
+                  {% set end_h = (end_s[0] | int) + (end_s[1] | int) / 60 %}
+                  {% if end_h <= start_h %}
+                    {% set duration = (24 - start_h) + end_h %}
+                  {% else %}
+                    {% set duration = end_h - start_h %}
+                  {% endif %}
                   
                   {% if state == '1' %}
                     {% set ns.current_red = ns.current_red + duration %}
