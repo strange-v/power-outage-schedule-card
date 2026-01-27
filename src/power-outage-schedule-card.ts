@@ -155,7 +155,7 @@ export class PowerOutageScheduleCard extends LitElement {
 
   getRelativeDate(date: string) {
     const dateParts = date.split('.');
-    const inputDate = new Date(`${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`);
+    const inputDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
     const currentDate = new Date();
 
     const inputDateOnly = new Date(inputDate.getFullYear(), inputDate.getMonth(), inputDate.getDate());

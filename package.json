@@ -1,6 +1,6 @@
 {
   "name": "power-outage-schedule-card",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Power outage schedule card for Home Assistant",
   "main": "dist/power-outage-schedule-card.js",
   "scripts": {
