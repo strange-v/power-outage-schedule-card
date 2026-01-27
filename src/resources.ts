@@ -6,15 +6,15 @@ import {
   Time,
 } from './types'
 
-export function getScheduleGraph(queue: string, day: string, periods: PowerOutagePeriod[], today: boolean, colors: ScheduleGraphColors): Template {
+export function getScheduleGraph(queue: string, day: string, periods: PowerOutagePeriod[], showHidePast: boolean, colors: ScheduleGraphColors): Template {
   const cls: Record<number, string> = {};
-  const now = new Date;
+  const currentTimeObj = new Date();
   let hour = 0;
   let idx = 0;
   while (hour < 24) {
     cls[idx] = '';
 
-    if (today && (now.getHours() > hour || (now.getHours() == hour && now.getMinutes() > 30 && !(idx % 2)))) {
+    if (showHidePast && (currentTimeObj.getHours() > hour || (currentTimeObj.getHours() == hour && currentTimeObj.getMinutes() > 30 && !(idx % 2)))) {
       cls[idx] += 'past';
     }
 

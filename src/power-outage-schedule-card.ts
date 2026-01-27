@@ -65,7 +65,11 @@ export class PowerOutageScheduleCard extends LitElement {
     const data = this.getQueueData(id);
     const day = this.getRelativeDate(data.eventDate);
     const dayLocal = localize(`common.${day}`);
-    const hidePast = this.config.hide_past_hours && day == 'Today';
+
+    const eventDateObj = new Date(data.eventDate.split('.').reverse().join('-'));
+    const isToday = eventDateObj.toDateString() === new Date().toDateString();
+    
+    const hidePast = this.config.hide_past_hours && isToday;
     const graph = getScheduleGraph(queue, dayLocal!, data.periods, hidePast, colors);
     const reload = this.getReloadIcon();
 
@@ -155,7 +159,7 @@ export class PowerOutageScheduleCard extends LitElement {
 
   getRelativeDate(date: string) {
     const dateParts = date.split('.');
-    const inputDate = new Date(`${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`);
+    const inputDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
     const currentDate = new Date();
 
     const inputDateOnly = new Date(inputDate.getFullYear(), inputDate.getMonth(), inputDate.getDate());
