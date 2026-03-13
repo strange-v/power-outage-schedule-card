@@ -7,7 +7,7 @@ import babel from '@rollup/plugin-babel';
 import postcss from 'rollup-plugin-postcss';
 import postcssPresetEnv from 'postcss-preset-env';
 import postcssLit from 'rollup-plugin-postcss-lit';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 import minifyLiterals from 'rollup-plugin-minify-html-literals';
 import image from '@rollup/plugin-image';
 import replace from '@rollup/plugin-replace';
